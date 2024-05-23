@@ -14,8 +14,9 @@ export class PostService {
 
   async create(createPostDto: CreatePostDto): Promise<MarketPost> {
     const market = await this.marketServ.getMarketById(createPostDto.market);
-    console.log('POST DTO', market);
+   
     const dataToStore: CreatePostDto = {
+      //@ts-ignore
       market: market._id,
       description: createPostDto.description,
     };
