@@ -3,10 +3,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateMarketDto } from 'src/dto/market.dto';
 import { Market } from 'src/schema/market.schema';
+import { MarketPost } from 'src/schema/post.schema';
 
 @Injectable()
 export class MarketService {
-  constructor(@InjectModel(Market.name) private marketModel: Model<Document>) {}
+  constructor(
+    @InjectModel(Market.name) private marketModel: Model<Document>,
+    @InjectModel(MarketPost.name) private readonly postModel: Model<Document>,
+  ) {}
 
   async createMarket(marketDto: CreateMarketDto): Promise<Market> {
     const newMarket = new this.marketModel(marketDto);
@@ -17,6 +21,19 @@ export class MarketService {
   async getAllMarkets(): Promise<Market[]> {
     const list: Market[] = await this.marketModel.find();
     return list;
+  }
+  async getAllMarketsWithProducts(): Promise<any> {
+    const marketList: Market[] = await this.marketModel.find().lean();
+    const combinedList = await Promise.all(
+      marketList.map(async (market) => {
+        const products = await this.postModel.find({ market: market._id });
+        return {
+          ...market,
+          products,
+        };
+      }),
+    );
+    return combinedList;
   }
 
   async getMarketById(id: string): Promise<Market> {

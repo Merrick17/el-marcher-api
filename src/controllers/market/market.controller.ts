@@ -24,7 +24,7 @@ import {
 import { AuthGuard } from 'src/guards/auth/auth.guard';
 
 import { MarketService } from 'src/services/market/market.service';
-@UseGuards(AuthGuard)
+//@UseGuards(AuthGuard)
 @Controller('markets')
 @ApiTags('Markets')
 export class MarketController {
@@ -72,7 +72,27 @@ export class MarketController {
       };
     }
   }
-
+  @Get("/combined")
+  @ApiOperation({ summary: 'Get all markets' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns all markets',
+    type: GetAllMarketsResDto,
+  })
+  async getAllMarketsCombined(): Promise<GetAllMarketsResDto> {
+    try {
+      const resp = await this.marketService.getAllMarketsWithProducts();
+      return {
+        success: true,
+        marketList: resp,
+      };
+    } catch (error) {
+      return {
+        error: error.message,
+        success: true,
+      };
+    }
+  }
   @Get(':id')
   @ApiOperation({ summary: 'Get a market by ID' })
   @ApiResponse({
